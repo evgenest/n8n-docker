@@ -1,9 +1,12 @@
 services:
   n8n:
-    image: docker.n8n.io/n8nio/n8n
+    image: docker.n8n.io/n8nio/n8n:1.111.1
+    container_name: n8n
     restart: always
     ports:
-      - 5678:5678
+      - "5678:5678"
+    networks:
+      - app-network
     environment:
       - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
       - N8N_PORT=5678
@@ -11,12 +14,21 @@ services:
       - NODE_ENV=production
       - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+
+      # Исправление предупреждений:
+      - DB_SQLITE_POOL_SIZE=10
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
     volumes:
       - n8n_data:/home/node/.n8n
       # - ${DATA_FOLDER}/local_files:/files
 
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2025.9.0
+    container_name: cloudflared
+    networks:
+      - app-network
     restart: always
     command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
     depends_on:
@@ -25,3 +37,8 @@ services:
 volumes:
   n8n_data:
     external: true
+
+networks:
+  app-network:
+    driver: bridge
+    name: n8n-network
