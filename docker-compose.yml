@@ -1,17 +1,4 @@
-version: "3.7"
-
 services:
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - caddy_data:/data
-      - ${DATA_FOLDER}/caddy_config:/config
-      - ${DATA_FOLDER}/caddy_config/Caddyfile:/etc/caddy/Caddyfile
-
   n8n:
     image: docker.n8n.io/n8nio/n8n
     restart: always
@@ -29,7 +16,5 @@ services:
       - ${DATA_FOLDER}/local_files:/files
       
 volumes:
-  caddy_data:
-    external: true
   n8n_data:
     external: true
